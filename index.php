@@ -102,9 +102,10 @@ else
                         "CSSStyleSheet" : CSSStyleSheet
                     };
 
-                    // Censor some paths containing dates and times to encourage
-                    // results' ident reuse.
+                    // Censor some paths to encourage results' ident reuse.
                     var censoredPaths = {
+                        "this.history.length"        : true,
+                        // dates and times
                         "this.performance.timing"    : true,
                         "this.document.lastModified" : true
                     };
