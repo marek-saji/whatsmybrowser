@@ -50,7 +50,7 @@ else
     $server = array();
     foreach ($_SERVER as $name => & $one_data)
     {
-        if (substr($name, 0, 5) === 'HTTP_')
+        if ('HTTP_CACHE_CONTROL' !== $name && substr($name, 0, 5) === 'HTTP_')
         {
             $server[substr($name, 5)] =& $one_data;
         }
@@ -108,7 +108,8 @@ else
 
                     // Censor some paths to encourage results' ident reuse.
                     var censoredPaths = {
-                        "this.history.length"        : true,
+                        "this.history.length"              : true,
+                        "this.performance.navigation.type" : true,
                         // dates and times
                         "this.performance.timing"    : true,
                         "this.document.lastModified" : true
