@@ -26,6 +26,10 @@ if (@$_POST)
 else if (false === empty($path))
 {
     @list($ident, $format) = explode(',', $path[0], 2);
+    if (false === isset($format))
+    {
+        $format = 'result';
+    }
     if (basename($ident) !== $ident)
     {
         header('HTTP/1.0 500 Internal Server Error');
