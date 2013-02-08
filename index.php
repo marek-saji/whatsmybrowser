@@ -6,7 +6,7 @@
  * Licensed under MIT. http://marek-saji.mit-license.org/
  */
 
-$path_flat = trim(@$_SERVER['PATH_INFO'], '/');
+$path_flat = trim(@$_SERVER['REQUEST_URI'], '/');
 $path = $path_flat ? explode('/', $path_flat) : array();
 
 if (@$_POST)
