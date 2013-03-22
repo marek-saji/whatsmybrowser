@@ -149,7 +149,7 @@ else
                                 // discard "hidden" properties (like document.all)
                                 output[p] = undefined;
                             }
-                            else if (typeof input[p] === "object")
+                            else if (null !== input[p] && typeof input[p] === "object")
                             {
                                 for (idx in censoredObjects)
                                 {
