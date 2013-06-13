@@ -13,7 +13,7 @@
 list($path_flat) = explode('?', trim(@$_SERVER['REQUEST_URI'], '/'), 2);
 $path = $path_flat ? explode('/', $path_flat) : array();
 
-if (false === empty($_REQUEST['server']))
+if (false === empty($_GET['server']))
 {
     // Save new information
 
