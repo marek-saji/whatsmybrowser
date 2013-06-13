@@ -195,7 +195,8 @@ else
                     // Censor some of object types.
                     var censoredObjects = {
                         "Element"       : Element,
-                        "CSSStyleSheet" : CSSStyleSheet
+                        "CSSStyleSheet" : CSSStyleSheet,
+                        "History"       : History
                     };
 
                     // Censor some paths to encourage results' ident reuse.
