@@ -179,6 +179,7 @@ else
 
         <form method="post" id="form" action="<?=$target_url?>">
             <input type="hidden" name="client" id="client" value="false" />
+            <input type="submit" value="" style="display:none" />
         </form>
 
         <script>
