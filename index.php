@@ -26,10 +26,10 @@ if (false === empty($_REQUEST['server']))
         ,
         JSON_PRETTY_PRINT
     );
-    $ident = substr(sha1($serialized_data), 0, 7);
+    $ident = substr(sha1($data), 0, 7);
 
     $file_path = "./results/{$ident}.json";
-    file_put_contents($file_path, $serialized_data);
+    file_put_contents($file_path, $data);
 
     $follow_to = "http://{$_SERVER['HTTP_HOST']}/{$ident}";
     if (isset($_GET['follow_to']))
