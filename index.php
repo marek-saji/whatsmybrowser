@@ -2,42 +2,58 @@
 /**
  * Quick and dirty script for collecting browser information.
  * Useful for bug reports.
+ *
+ * If follow_to GET param is included, after collecting information,
+ * user will be redirected to given page. `%s` in the param will
+ * be replaced with URL displaying collected information.
+ *
  * (c) Marek `saji` Augustynowicz
  * Licensed under MIT. http://marek-saji.mit-license.org/
  */
-
-$path_flat = trim(@$_SERVER['REQUEST_URI'], '/');
+list($path_flat) = explode('?', trim(@$_SERVER['REQUEST_URI'], '/'), 2);
 $path = $path_flat ? explode('/', $path_flat) : array();
 
-if (@$_POST)
+if (false === empty($_REQUEST['server']))
 {
-    $data = $_POST;
-    foreach ($data as & $one_data)
-    {
-        $one_data = json_decode($one_data, true);
-        unset($one_data);
-    }
-    $serialized_data = json_encode($data, JSON_PRETTY_PRINT);
+    // Save new information
+
+    // decode each entry in $_REQUEST (== GET + POST),
+    // then encode everything together
+    $data = json_encode(
+        array_map(
+            function ($json) { return json_decode($json, true); },
+            $_REQUEST)
+        ,
+        JSON_PRETTY_PRINT
+    );
     $ident = substr(sha1($serialized_data), 0, 7);
+
     $file_path = "./results/{$ident}.json";
     file_put_contents($file_path, $serialized_data);
-    header('Location: ./' . $ident);
+
+    $follow_to = "http://{$_SERVER['HTTP_HOST']}/{$ident}";
+    if (isset($_GET['follow_to']))
+    {
+        $follow_to = sprintf($_GET['follow_to'], $follow_to);
+    }
+    header('Location: ' . $follow_to);
 }
 else if (false === empty($path))
 {
-    @list($ident, $format) = explode(',', $path[0], 2);
-    if (false === isset($format))
-    {
-        $format = 'result';
-    }
+    // Display saved information
+
+    $ident = reset($path);
+
     if (basename($ident) !== $ident)
     {
         header('HTTP/1.0 500 Internal Server Error');
         echo '500 Go to hell.';
         die(500);
     }
+
     $file_path = "./results/{$ident}.json";
     $data = @ file_get_contents($file_path);
+
     if (false === $data)
     {
         header('HTTP/1.0 404 Not Found');
@@ -47,6 +63,7 @@ else if (false === empty($path))
 }
 else
 {
+    // Prepare for collecting information: save server data
     $server = array();
     foreach ($_SERVER as $name => & $one_data)
     {
@@ -57,37 +74,61 @@ else
         unset($name, $one_data);
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>What's my browser?</title>
-    <script src="modules/JSON-js/json2.js"></script>
-</head>
+<?php if (false === empty($data)) : ?>
 
-<body class=" nojs ">
-    <script>
-        (function (b) {
-            b.className = b.className.replace(/ nojs /, " js ");
-        }(window.document.body));
-    </script>
+    <?php
+    // Display collected information
+    ?>
 
-    <?php if (false === empty($data)) : ?>
+    <head>
+        <title>What's my browser?</title>
+        <script src="modules/JSON-js/json2.js"></script>
+    </head>
 
-        <?php if ('json' === $format) : ?>
-            <pre><?=htmlspecialchars($data)?></pre>
-        <?php else : ?>
-            <p>Include this link in your bug report:</p>
-            <strong>http://<?=$_SERVER['HTTP_HOST']?><?=$_SERVER['REQUEST_URI']?></strong>
-        <?php endif; ?>
+    <body>
 
-    <?php else : ?>
+        <p>Include this link in your bug report:</p>
+        <strong>http://<?=$_SERVER['HTTP_HOST']?><?=$_SERVER['REQUEST_URI']?></strong>
+        <small>
+            <p>
+                Details:
+            </p>
+            <pre><?= htmlspecialchars($data) ?></pre>
+        </small>
 
-        <form action="." method="post" id="form">
-            <input type="hidden" name="server" value='<?=str_replace("'", "'&#039;", htmlspecialchars(json_encode($server), ENT_NOQUOTES|ENT_HTML5))?>' />
-            <input type="hidden" name="client" id="client" value="" />
-            <input type="submit" value="Get the results" />
+    </body>
+
+<?php else : ?>
+
+    <?php
+    // Collect information:
+    // - for non-JS browsers, meta-refresh will collect only server data
+    // - JS browsers will also give up lots of information from window object
+    ?>
+
+    <?php
+    $target_url = '/?' . http_build_query(array('server' => json_encode($server)), ENT_NOQUOTES|ENT_HTML5);
+    ?>
+
+    <head>
+        <title>What's my browser?</title>
+        <script src="modules/JSON-js/json2.js"></script>
+        <?php if (true === empty($data)) : ?>
+        <meta http-equiv="refresh" content="3;<?=$target_url?>" />
+        <?php endif; /* false === empty($data) */ ?>
+    </head>
+
+    <body>
+
+        <p>Heading to results page...</p>
+
+        <form method="post" id="form" action="<?=$target_url?>">
+            <input type="hidden" name="client" id="client" value="false" />
         </form>
 
         <script>
@@ -202,8 +243,8 @@ else
             }());
         </script>
 
-    <?php endif; ?>
+    </body>
 
-</body>
+<?php endif; ?>
 
 </html>
