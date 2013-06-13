@@ -88,18 +88,68 @@ else
     <head>
         <title>What's my browser?</title>
         <script src="modules/JSON-js/json2.js"></script>
+
+        <style>
+
+            html, body
+            {
+                font-family:
+                    Roboto,
+                    Droid Sans,
+                    sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: silver;
+            }
+            pre
+            {
+                font-family:
+                    Source Code Pro Light,
+                    Source Code Pro,
+                    Consolas,
+                    Monaco,
+                    Droid Sans Mono,
+                    Lucida Console,
+                    Lucida Sans Typewriter,
+                    Andale Mono,
+                    monospace;
+            }
+            p
+            {
+                margin: 0 0 1em;;
+            }
+            #share
+            {
+                vertical-align: middle;
+
+                text-align: center;
+                padding: 3em 1em;
+                font-size: 1.2em;
+            }
+            #details
+            {
+                background-color: white;
+                border-radius: 1em 1em 0 0;
+                padding: 2em;
+            }
+        </style>
     </head>
 
     <body>
 
-        <p>Include this link in your bug report:</p>
-        <strong>http://<?=$_SERVER['HTTP_HOST']?><?=$_SERVER['REQUEST_URI']?></strong>
-        <small>
+        <section id="share">
+            <div class="😢">
+                <p>Include this link in your bug report:</p>
+                <strong>http://<?=$_SERVER['HTTP_HOST']?><?=$_SERVER['REQUEST_URI']?></strong>
+            </div>
+        </section>
+
+        <section id="details">
             <p>
                 Details:
             </p>
             <pre><?= htmlspecialchars($data) ?></pre>
-        </small>
+        </section>
 
     </body>
 
