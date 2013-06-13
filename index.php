@@ -226,51 +226,58 @@ else
 
                         for (var p in input)
                         {
-                            pPath = (path ? (path+".") : "") + p;
+                            try
+                            {
+                                pPath = (path ? (path+".") : "") + p;
 
-                            if (censoredPaths[pPath])
-                            {
-                                output[p] = "{censored path}";
-                            }
-                            else if (typeof input[p] === "function")
-                            {
-                                output[p] = "{function}";
-                            }
-                            else if (typeof input[p] === "undefined")
-                            {
-                                // discard "hidden" properties (like document.all)
-                                output[p] = undefined;
-                            }
-                            else if (null !== input[p] && typeof input[p] === "object")
-                            {
-                                for (idx in censoredObjects)
+                                if (censoredPaths[pPath])
                                 {
-                                    if (input[p] instanceof censoredObjects[idx])
+                                    output[p] = "{censored path}";
+                                }
+                                else if (typeof input[p] === "function")
+                                {
+                                    output[p] = "{function}";
+                                }
+                                else if (typeof input[p] === "undefined")
+                                {
+                                    // discard "hidden" properties (like document.all)
+                                    output[p] = undefined;
+                                }
+                                else if (null !== input[p] && typeof input[p] === "object")
+                                {
+                                    for (idx in censoredObjects)
                                     {
-                                        output[p] = "{" + idx + "}";
-                                        break;
+                                        if (input[p] instanceof censoredObjects[idx])
+                                        {
+                                            output[p] = "{" + idx + "}";
+                                            break;
+                                        }
+                                    }
+
+                                    if (undefined === output[p])
+                                    {
+                                        idx = refs.indexOf(input[p]);
+
+                                        if (-1 !== idx)
+                                        {
+                                            output[p] = "{reference to " + refsPaths[idx]  + "}";
+                                        }
+                                        else
+                                        {
+                                            refs.push(input[p]);
+                                            refsPaths.push(pPath);
+                                            output[p] = recursion(input[p], pPath, depth);
+                                        }
                                     }
                                 }
-
-                                if (undefined === output[p])
+                                else
                                 {
-                                    idx = refs.indexOf(input[p]);
-
-                                    if (-1 !== idx)
-                                    {
-                                        output[p] = "{reference to " + refsPaths[idx]  + "}";
-                                    }
-                                    else
-                                    {
-                                        refs.push(input[p]);
-                                        refsPaths.push(pPath);
-                                        output[p] = recursion(input[p], pPath, depth);
-                                    }
+                                    output[p] = input[p];
                                 }
                             }
-                            else
+                            catch (e)
                             {
-                                output[p] = input[p];
+                                output[p] = "{exception thrown: " + e + "}";
                             }
                         }
 
