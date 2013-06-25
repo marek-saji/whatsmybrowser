@@ -162,7 +162,14 @@ else
     ?>
 
     <?php
-    $target_url = '/?' . http_build_query(array('server' => json_encode($server)), ENT_NOQUOTES|ENT_HTML5);
+    $target_query = array(
+        'server'    => json_encode($server)
+    );
+    if (isset($_GET['follow_to']))
+    {
+        $target_query['follow_to'] = $_GET['follow_to'];
+    }
+    $target_url = '/?' . http_build_query($target_query, ENT_NOQUOTES|ENT_HTML5);
     ?>
 
     <head>
