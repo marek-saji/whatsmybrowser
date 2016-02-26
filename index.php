@@ -10,6 +10,29 @@
  * (c) Marek `saji` Augustynowicz
  * Licensed under MIT. http://marek-saji.mit-license.org/
  */
+$texts = array(
+    'en' => array(
+        'TITLE' => "What's my browser?",
+        'REDIRECTING' => 'Heading to results page...',
+        'LINK_LABEL' => 'Send this link to anyone who wants to know what browser you are using:',
+        'DETAILS' => 'Details:',
+    ),
+    'pl' => array(
+        'TITLE' => "Jakiej przeglądarki używam?",
+        'REDIRECTING' => 'Przechodzenie do strony z informacjami...',
+        'LINK_LABEL' => 'Wyślij ten link osobie, która chce wiedzieć jakiej przeglądarki używasz:',
+        'DETAILS' => 'Szczegóły:',
+    ),
+);
+$locale = $_GET['locale'] ?: locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+$lang = locale_lookup(
+    array_keys($texts),
+    $locale,
+    false, // canonicalize
+    key($texts) // use first one by default
+);
+$_ =& $texts[$lang];
+
 list($path_flat) = explode('?', trim(@$_SERVER['REQUEST_URI'], '/'), 2);
 $path = $path_flat ? explode('/', $path_flat) : array();
 
@@ -32,6 +55,10 @@ if (false === empty($_GET['server']))
     file_put_contents($file_path, $data);
 
     $follow_to = "http://{$_SERVER['HTTP_HOST']}/{$ident}";
+    if (isset($_GET['locale']))
+    {
+        $follow_to .= '?locale=' . $_GET['locale'];
+    }
     if (isset($_GET['follow_to']))
     {
         $follow_to = sprintf($_GET['follow_to'], $follow_to);
@@ -86,7 +113,7 @@ else
     ?>
 
     <head>
-        <title>What's my browser?</title>
+        <title><?= $_['TITLE'] ?></title>
         <script src="modules/JSON-js/json2.js"></script>
 
         <style>
@@ -139,14 +166,14 @@ else
 
         <section id="share">
             <div class="😢">
-                <p>Include this link in your bug report:</p>
+                <p><?= $_['LINK_LABEL'] ?></p>
                 <strong>http://<?=$_SERVER['HTTP_HOST']?><?=$_SERVER['REQUEST_URI']?></strong>
             </div>
         </section>
 
         <section id="details">
             <p>
-                Details:
+                <?= $_['DETAILS'] ?>
             </p>
             <pre><?= htmlspecialchars($data) ?></pre>
         </section>
@@ -162,13 +189,16 @@ else
     ?>
 
     <?php
-    $target_query = array(
-        'server'    => json_encode($server)
-    );
+    $target_query = array();
     if (isset($_GET['follow_to']))
     {
         $target_query['follow_to'] = $_GET['follow_to'];
     }
+    if (isset($_GET['locale']))
+    {
+        $target_query['locale'] = $_GET['locale'];
+    }
+    $target_query['server'] = json_encode($server);
     $target_url = '/?' . http_build_query($target_query, ENT_NOQUOTES|ENT_HTML5);
     ?>
 
@@ -182,7 +212,7 @@ else
 
     <body>
 
-        <p>Heading to results page...</p>
+        <p><?= $_['REDIRECTING'] ?></p>
 
         <form method="post" id="form" action="<?=$target_url?>">
             <input type="hidden" name="client" id="client" value="false" />
